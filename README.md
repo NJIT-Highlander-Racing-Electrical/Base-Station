@@ -25,4 +25,6 @@ Essentially, a wireless version of the dashboard on a PC
  
  ## References
  * Take some inspiration from Cornell Zigbee Data Acquisition Module
-   * https://people.ece.cornell.edu/land/courses/eceprojectsland/STUDENTPROJ/2008to2009/joeneiss/MEng_Joe%20Neiss_v3.pdf  
+   * https://people.ece.cornell.edu/land/courses/eceprojectsland/STUDENTPROJ/2008to2009/joeneiss/MEng_Joe%20Neiss_v3.pdf
+ * 3D view of car orientation could be done in Unity; take inspiration from Blaise Baker DAQ setup
+     * https://www.blaisesbaker.com/projects/baja-sae/data-acquisition#h.7vc1ioheo1co
