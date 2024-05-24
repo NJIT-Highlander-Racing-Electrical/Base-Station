@@ -21,4 +21,8 @@ Essentially, a wireless version of the dashboard on a PC
 ## Software
 
 * May be able to use Serial Studio for displaying serial data as GUI 
-  * https://serial-studio.github.io/ 
+  * https://serial-studio.github.io/
+ 
+ ## References
+ * Take some inspiration from Cornell Zigbee Data Acquisition Module
+   * https://people.ece.cornell.edu/land/courses/eceprojectsland/STUDENTPROJ/2008to2009/joeneiss/MEng_Joe%20Neiss_v3.pdf  
