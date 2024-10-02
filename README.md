@@ -1,7 +1,8 @@
 # Base Station
 
 A repository dedicated to the implementation of a PC Base Station that receives vehicle data over RF and displays it on a PC Program
-Essentially, a wireless version of the dashboard on a PC
+Essentially, a wireless version of the dashboard on a PC. This will also require a dedicated transmission subsystem on the vehicle.
+
 
 ## Features/Goals
 
@@ -9,6 +10,10 @@ Essentially, a wireless version of the dashboard on a PC
 * Digital readouts of RPM, CVT Temp, vehicle speed, 2WD/4WD status, etc
 * Live view of vehicle on map via GPS (may require offline map downloading/overlaying on image)
 * 3D view of car orientation based on accelerometer
+
+## Physical Implementation
+
+ * This can be its own independent subsystem on the vehicle that receives CAN bus vehicle data nnd transmits it out to a PC. There is no need to have it be a part of the DAQ as all DAQ data (GPS, accelerometer, etc), can be transmitted over CAN.
 
 ## Hardware
 
