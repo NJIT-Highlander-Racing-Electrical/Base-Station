@@ -1,0 +1,3 @@
+[submodule "CAN-Bus"]
+	path = CAN-Bus
+	url = git@github.com:NJIT-Highlander-Racing-Electrical/CAN-Bus.git
