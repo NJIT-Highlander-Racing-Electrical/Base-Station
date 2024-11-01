@@ -17,13 +17,13 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
 
 ## Hardware
 
-* XBee RR Pro modules to transmit data between car and PC
-  * RR Pro's advertise a maximum range of 2 miles outdoors line-of-sight
-* RP-SMA Antenna with mounting bracket to attach antenna to rear of firewall
-* RP-SMA Antenna with magnetic base to attach to trailer, pole, etc on PC base station side
-* XBee Explorer USB Module to transfer data from RR Pro to PC over Serial
+* LoRa ESP32 on vehicle and at base station
 
 ## Software
+
+* We could use the WiFi capabilities of the Base Station ESP32 to host a webpage where info can be displayed.
+
+* The most reliable connection would be wired data transfer directly from the ESP32 to whatever is graphically displaying the data. That way the only wireless element that could fail/be weak is LoRa
 
 * May be able to use Serial Studio for displaying serial data as GUI 
   * https://serial-studio.github.io/
