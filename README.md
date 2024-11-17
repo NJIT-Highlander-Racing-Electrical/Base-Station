@@ -1,6 +1,6 @@
 # Base Station
 
-A repository dedicated to the implementation of a PC Base Station that receives vehicle data over RF and displays it on a PC Program
+A repository dedicated to the implementation of a PC Base Station that receives vehicle data over LoRa and displays it on [Serial Studio](https://serial-studio.github.io/)
 Essentially, a wireless version of the dashboard on a PC. This will also require a dedicated transmission subsystem on the vehicle.
 
 
@@ -13,20 +13,26 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
 
 ## Physical Implementation
 
- * This can be its own independent subsystem on the vehicle that receives CAN bus vehicle data nnd transmits it out to a PC. There is no need to have it be a part of the DAQ as all DAQ data (GPS, accelerometer, etc), can be transmitted over CAN.
+ * This is its own independent subsystem on the car, receiving data over CAN and then transmitting it out to the PC over LoRa
+
+ * At the PC side, we will have an enclosure at the top of the flag pole on the trailer, which contains the antenna and ESP32
+
+ * There are a few options to power this:
+    * Battery, but then we have to replace it every so often
+    * 12V to eliminate any voltage drop over the long distance, but then we need a dedicated 12V source and step down regulator
+    * **5V over USB, allowing us to power from a wall outlet (DC adapter), PC, or battery bank**
+        * The voltage sag on this should be minimal -- about a quarter volt at most
+     
+ * There are a few options to get data:
+     * Long USB cable, but this was tested and did not work
+     * Active USB cable, but we would need to find a way to enclose that hardware at the top, which can get bulky and heavy
+     * RS485, but this requires translating the signal at the top and bottom
+     * **Bluetooth LE. This may be less reliable than a wired serial connection, but it is easier and cheaper to set up. It also allows the laptop receiving the data to be more portable. Last, Serial Studio natively supports Bluetooth LE as a data source**
 
 ## Hardware
 
-* LoRa ESP32 on vehicle and at base station
-
-## Software
-
-* We could use the WiFi capabilities of the Base Station ESP32 to host a webpage where info can be displayed.
-
-* The most reliable connection would be wired data transfer directly from the ESP32 to whatever is graphically displaying the data. That way the only wireless element that could fail/be weak is LoRa
-
-* May be able to use Serial Studio for displaying serial data as GUI 
-  * https://serial-studio.github.io/
+* LoRa ESP32 from Heltec
+* LoRa Antennas
  
  ## References
  * Take some inspiration from Cornell Zigbee Data Acquisition Module
