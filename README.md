@@ -21,7 +21,7 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
     * Battery, but then we have to replace it every so often
     * 12V to eliminate any voltage drop over the long distance, but then we need a dedicated 12V source and step down regulator
     * <b><i>5V over USB, allowing us to power from a wall outlet (DC adapter), PC, or battery bank</i></b>
-        * The voltage sag on this should be minimal -- about a quarter volt at most
+        * Even with 50 ft of 18AWG, the voltage sag on this should be minimal -- about a quarter volt at most
      
  * There are a few options to get data:
      * Long USB cable, but this was tested and did not work
