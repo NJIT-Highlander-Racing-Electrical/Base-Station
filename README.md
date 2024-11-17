@@ -34,6 +34,7 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
 
 * LoRa ESP32 from Heltec
 * LoRa Antennas
+* Mode switch (to switch between low/high datarate, etc)
  
  ## References
  * Take some inspiration from Cornell Zigbee Data Acquisition Module
