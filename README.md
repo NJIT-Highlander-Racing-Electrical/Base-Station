@@ -20,14 +20,14 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
  * There are a few options to power this:
     * Battery, but then we have to replace it every so often
     * 12V to eliminate any voltage drop over the long distance, but then we need a dedicated 12V source and step down regulator
-    * **5V over USB, allowing us to power from a wall outlet (DC adapter), PC, or battery bank**
+    * <b><i>5V over USB, allowing us to power from a wall outlet (DC adapter), PC, or battery bank</i></b>
         * The voltage sag on this should be minimal -- about a quarter volt at most
      
  * There are a few options to get data:
      * Long USB cable, but this was tested and did not work
      * Active USB cable, but we would need to find a way to enclose that hardware at the top, which can get bulky and heavy
      * RS485, but this requires translating the signal at the top and bottom
-     * **Bluetooth LE. This may be less reliable than a wired serial connection, but it is easier and cheaper to set up. It also allows the laptop receiving the data to be more portable. Last, Serial Studio natively supports Bluetooth LE as a data source**
+     * <b><i>Bluetooth LE. This may be less reliable than a wired serial connection, but it is easier and cheaper to set up. It also allows the laptop receiving the data to be more portable. Last, Serial Studio natively supports Bluetooth LE as a data source</i></b>
 
 ## Hardware
 
