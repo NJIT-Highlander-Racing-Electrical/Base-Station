@@ -30,6 +30,8 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
      * RS485, but this requires translating the signal at the top and bottom
      * <b><i>Bluetooth LE. This may be less reliable than a wired serial connection, but it is easier and cheaper to set up. It also allows the laptop receiving the data to be more portable. Last, Serial Studio natively supports Bluetooth LE as a data source</i></b>
 
+* It would be nice to still be able to switch between a wired Serial connection and BLE on the base station side, as we can hookup directly to the device when it is not on the flagpole
+
 ## Hardware
 
 * LoRa ESP32 from Heltec
