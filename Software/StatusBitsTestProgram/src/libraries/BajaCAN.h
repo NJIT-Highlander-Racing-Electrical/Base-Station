@@ -1,6 +1,6 @@
 /*********************************************************************************
 *   
-*   BajaCAN.h  -- Version 1.2.9 
+*   BajaCAN.h  -- Version 1.2.12 
 * 
 *   The goal of this BajaCAN header/driver is to enable all subsystems throughout
 *   the vehicle to use the same variables, data types, and functions. That way,
@@ -217,6 +217,7 @@ volatile int frontLeftWheelState;
 volatile int frontRightWheelState;
 volatile int rearLeftWheelState;
 volatile int rearRightWheelState;
+
 
 // Pedal Sensors CAN
 volatile int gasPedalPercentage;
@@ -534,8 +535,10 @@ void CAN_Task_Code(void* pvParameters) {
             CAN.beginPacket(statusDAS_ID);
             CAN.print(statusDAS);
             CAN.endPacket();
+          } else if (CAN.packetRtr() && currentSubsystem != DAS) {
+            // We received an RTR but we are not the intended recipient, don't do anything
           }
-          // Otherwise just save the data to our variable
+          // Otherwise if it was not an RTR just save the data to our variable
           else {
             statusDAS = CAN.parseInt();
           }
@@ -548,8 +551,10 @@ void CAN_Task_Code(void* pvParameters) {
             CAN.beginPacket(statusWheels_ID);
             CAN.print(statusWheels);
             CAN.endPacket();
+          } else if (CAN.packetRtr() && currentSubsystem != WHEEL_SPEED) {
+            // We received an RTR but we are not the intended recipient, don't do anything
           }
-          // Otherwise just save the data to our variable
+          // Otherwise if it was not an RTR just save the data to our variable
           else {
             statusWheels = CAN.parseInt();
           }
@@ -562,8 +567,10 @@ void CAN_Task_Code(void* pvParameters) {
             CAN.beginPacket(statusPedals_ID);
             CAN.print(statusPedals);
             CAN.endPacket();
+          } else if (CAN.packetRtr() && currentSubsystem != PEDALS) {
+            // We received an RTR but we are not the intended recipient, don't do anything
           }
-          // Otherwise just save the data to our variable
+          // Otherwise if it was not an RTR just save the data to our variable
           else {
             statusPedals = CAN.parseInt();
           }
