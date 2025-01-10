@@ -22,6 +22,7 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
     * 5V over USB
         * This would be ideal because we could power it with a laptop or battery bank too
         * At ~50 ft in length, the resistance may be too high to supply close enough to a full 5V, especially with a higher current draw from WiFi
+        * Testing with a 12V source and ~45ft of cable, I got 11.8V at the receiving end with 0.111A (at 12V [1.3W]) of current draw. 
     * <b><i>12V to eliminate any voltage drop over the long distance, with a step down regulator inside</i></b>
         * An aviation plug connector can be used at the antenna side to make the connection rigid while still being able to be disconnected.
         * We can power it with a 12VDC wall adapter
