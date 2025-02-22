@@ -1,0 +1,203 @@
+#include <heltec_unofficial.h>
+
+#define FREQUENCY 905.2
+//#define BANDWIDTH 125
+//#define SPREADING_FACTOR 9
+
+#define BANDWIDTH 500
+#define SPREADING_FACTOR 7
+
+// max 22
+#define TRANSMIT_POWER 0
+
+#include <WiFi.h>
+
+bool rxFlag = false;
+bool overflow = false;
+void rx_callback() {
+	if(rxFlag) overflow = true;
+	rxFlag = true;
+}
+
+bool usingWifi = false;
+
+WiFiServer server(23); // serial studio defaults to port 23 (telnet port) 
+
+QueueHandle_t queue_test;
+
+typedef struct {
+	size_t length;
+	char *data;
+} rxdata_t;
+
+union crc_value {
+	uint16_t intVal;
+	char strVal[2];
+};
+
+void send_stuff(WiFiClient *client) {
+	const char *thing = "HTTP/1.1 200 OK\nContent-type: text/html\nConnection: close\n\nI am some very useful data\n";
+	client->println(thing);
+
+}
+
+#define MAX_CLIENTS 8
+void loop_wifi(void*) {
+	WiFiClient *clients[MAX_CLIENTS] = { NULL };
+	bool newData = false;
+	rxdata_t currentData;
+	for(;;) {
+
+		WiFiClient newClient = server.available();
+		if(newClient) {
+			bool foundSpot = false;
+			for(int i = 0; i < MAX_CLIENTS; ++i) {
+				if(clients[i] == NULL) { // found an empty spot
+					clients[i] = new WiFiClient(newClient); // copy the new client into the array
+					foundSpot = true;
+					break;
+				}
+			}
+			if(!foundSpot) {
+				// TODO: too many clients error
+			}
+		}
+
+		if(newData && currentData.data) free(currentData.data - 2/*lazy*/);
+		newData = false;
+		rxdata_t rxdata;
+		if(xQueueReceive(queue_test, &rxdata, 0) == pdPASS) {
+			newData = true;
+			currentData = rxdata;
+			rxdata_t rxdata2;
+			if(xQueuePeek(queue_test, &rxdata2, 0) == pdPASS) {
+				// there's more
+				both.println("m");
+			}
+		} else {
+			// TODO: rxdata was null?
+		}
+
+		if(newData) {
+			for(int i = 0; i < MAX_CLIENTS; ++i) {
+				WiFiClient *client = clients[i];
+				if(client) {
+					if(!client->connected()) {
+						delete clients[i]; // we made a copy before, delete it
+						clients[i] = NULL; // remove disconnected client from array
+						continue;
+					}
+					client->println(currentData.data);
+					//send_stuff(client);
+				}
+			}
+		}
+
+	}
+}
+
+void setup() {
+
+	RadioLibCRCInstance.size = 16;
+	RadioLibCRCInstance.poly = 0x755B;
+	RadioLibCRCInstance.init = 0xFFFF;
+	RadioLibCRCInstance.out = 0x0000;
+
+	heltec_setup();
+	heltec_ve(true);
+
+	both.print("Radio init... ");
+	radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR, 7, 0x13, 0, 8);
+	if(radio.setCRC(0) == RADIOLIB_ERR_INVALID_CRC_CONFIGURATION) {
+		both.println("bad bad bad");
+	}
+	//radio.beginFSK(434.0, 2.4, 4.5, 156.2, 0, 512);
+	radio.setOutputPower(TRANSMIT_POWER);
+
+	radio.setDio1Action(rx_callback);
+	radio.startReceive(RADIOLIB_SX126X_RX_TIMEOUT_INF);
+	both.println("success.");
+	both.print("Wifi init... ");
+
+	TaskHandle_t wifiHandle = NULL;
+	if(WiFi.softAP("NJIT Highlander Racing", "password123")) {
+		both.println("success.");
+		IPAddress ip = WiFi.softAPIP();
+		both.print("IP: ");
+		both.println(ip);
+		server.begin();
+		usingWifi = true;
+		xTaskCreate(
+				loop_wifi,
+				"wifi loop",
+				10000,
+				NULL,
+				0,
+				&wifiHandle
+			   );
+	} else {
+		both.println("failure.");
+	}
+
+
+
+	queue_test = xQueueCreate(16, sizeof(rxdata_t));
+	if(!queue_test) { both.println("QUEUE ERROR"); return; }
+
+}
+
+void loop() {
+	heltec_loop();
+
+	if(overflow) {
+		both.println("o");
+	}
+
+	if(rxFlag) {
+		size_t packetLen = radio.getPacketLength();
+
+		char *rxdata = (char*)malloc(packetLen);
+		if(!rxdata) {// TODO: malloc failed	
+		}
+
+		radio.readData((uint8_t*)rxdata, packetLen);
+
+		union crc_value checksum;
+		checksum.strVal[0] = rxdata[0];
+		checksum.strVal[1] = rxdata[1];
+
+		rxdata += 2; // yucky
+		packetLen -= 2; // also yucky
+
+		bool passed = checksum.intVal == (uint16_t)RadioLibCRCInstance.checksum((const uint8_t*)rxdata, packetLen);
+
+		if(!passed) {
+			/*rxdata_t rxdata_struct;
+			const char *errmsg = "  Packet corrupted";
+			char *errmsg_copy = (char*)malloc(19);
+			if(!errmsg_copy) return;
+			strncpy(errmsg_copy, errmsg, 18);
+			errmsg_copy[18] = 0;
+			errmsg_copy += 2; // very hacky to get it working
+			rxdata_struct.length = 17;
+			rxdata_struct.data = errmsg_copy;
+			xQueueSendToBack(queue_test, &rxdata_struct, 0);*/
+		} else if(_radiolib_status == RADIOLIB_ERR_NONE) {
+			//both.printf("SNR: %.2f\n", radio.getSNR());
+			//both.printf("%s\n", rxdata);
+
+			rxdata_t rxdata_struct;
+			rxdata_struct.length = packetLen;
+			//both.println(packetLen);
+
+			rxdata_struct.data = rxdata; // the queue receiver is responsible for freeing this rxdata
+						// if the queue overflows then oops memory leak TODO fix!!!!!
+			xQueueSendToBack(queue_test, &rxdata_struct, 0);
+		}
+		radio.startReceive(RADIOLIB_SX126X_RX_TIMEOUT_INF);
+		rxFlag = false;
+	}
+
+}
+
+

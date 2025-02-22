@@ -1,0 +1,53 @@
+#include <heltec_unofficial.h>
+
+#define FREQUENCY 905.2
+#define BANDWIDTH 125
+#define SPREADING_FACTOR 9
+
+// max 22
+#define TRANSMIT_POWER 0
+
+bool rxFlag = false;
+void rx_callback() {
+  rxFlag = true;
+}
+
+
+void setup() {
+  heltec_setup();
+
+  // enbale external power (which powers the screen)
+  heltec_ve(true);
+
+  both.println("Radio init");
+  radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR);
+  //radio.beginFSK(434.0, 2.4, 4.5, 156.2, 0, 512);
+  radio.setOutputPower(TRANSMIT_POWER);
+
+  radio.setDio1Action(rx_callback);
+  radio.startReceive(RADIOLIB_SX126X_RX_TIMEOUT_INF);
+
+
+
+
+}
+
+String rxdata;
+
+void loop() {
+  heltec_loop();
+
+  if(rxFlag) {
+      rxFlag = false;
+      radio.readData(rxdata);
+      if(_radiolib_status == RADIOLIB_ERR_NONE) {
+        both.printf("SNR: %.2f\n", radio.getSNR());
+        both.printf("%s\n", rxdata);
+      }
+      radio.startReceive(RADIOLIB_SX126X_RX_TIMEOUT_INF);
+
+  }
+
+}
+
+
