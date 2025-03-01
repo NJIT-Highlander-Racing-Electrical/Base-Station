@@ -106,7 +106,6 @@
 ************************************************************************************/
 
 // Include sandeepmistry's arduino-CAN library
-#include "arduino-CAN/src/CAN.h"
 #include "baja_data_compression.h"
 
 // Definitions for all CAN setup parameters
@@ -561,4 +560,3 @@ void CAN_Task_Code(void* pvParameters) {
     }
   }
 }
-

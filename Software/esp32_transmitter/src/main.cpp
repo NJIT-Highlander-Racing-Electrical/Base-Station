@@ -1,6 +1,8 @@
 #include <heltec_unofficial.h>
 #include <baja_data_compression.h>
 
+#include <BajaCAN_forLORA.h>
+
 #define FREQUENCY 905.2
 //#define BANDWIDTH 125
 //#define SPREADING_FACTOR 9
@@ -27,7 +29,7 @@ void setup() {
 
 	heltec_setup();
 	heltec_ve(true);
-	
+
 	both.println("Radio init");
 	//radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR);
 	radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR, 7, 0x13, 0, 8);
