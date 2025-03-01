@@ -107,6 +107,7 @@
 
 // Include sandeepmistry's arduino-CAN library
 #include "baja_data_compression.h"
+#include "arduino-CAN/src/CAN.h"
 
 // Definitions for all CAN setup parameters
 #define CAN_BAUD_RATE 1000E3
