@@ -460,6 +460,7 @@ void CAN_Task_Code(void *pvParameters)
       // Pedal Sensors Case
       case gasPedalPercentage_ID:
         all_data.pedal_data.gas = CAN.parseInt();
+        // Figure this out
         Serial.print("gas pedal received val: ");
         Serial.println(all_data.pedal_data.gas);
         current_recv_data_points |= PEDAL_DATA;
