@@ -89,7 +89,7 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 
 	}*/
 
-	if(newGpsData) {
+	if(newGpsData.latitude != 0 || newGpsData.longitude != 0) {
 		size_t written = snprintf(buf, bufLen, "%i,%i,", newGpsData.latitude, newGpsData.longitude);
 		buf += written;
 		bufLen -= written;

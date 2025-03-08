@@ -17,5 +17,8 @@ gps_lat_long_t process_gps_data(const baja_data_t *baja_data, const sent_data_po
 		
 		return corrected;
 	}
-	return (gps_lat_long_t)0;
+	static gps_lat_long_t empty;
+	empty.latitude = 0;
+	empty.longitude = 0;
+	return empty;
 }
