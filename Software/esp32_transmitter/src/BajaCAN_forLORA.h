@@ -165,19 +165,67 @@ public:
     return rxMsg.identifier; // Return the received packet ID
   }
 
-  int parseInt(int index = 0)
-  {
-    if (index >= 0 && index < rxMsg.data_length_code)
-    {
-      return rxMsg.data[index]; // Extract integer from received data
-    }
-    return -1; // Return -1 if index is invalid
-  }
+ // New parseInt() function that extracts multi-digit numbers
+ int parseInt()
+ {
+   char buffer[10];  // Buffer to store ASCII digits
+   int index = 0;    // Keeps track of buffer position
 
-  float parseFloat() {
-    float value;
-    memcpy(&value, rxMsg.data, sizeof(float));
-    return value;
+   for (int i = 0; i < rxMsg.data_length_code; i++)
+   {
+     char incomingChar = rxMsg.data[i];
+
+     if (isdigit(incomingChar))
+     {
+       if (index < sizeof(buffer) - 1)
+       {
+         buffer[index++] = incomingChar;
+       }
+     }
+     else if (index > 0)
+     {
+       // Stop if a non-digit is encountered after digits have been collected
+       break;
+     }
+   }
+
+   buffer[index] = '\0';  // Null-terminate string
+
+   return (index > 0) ? atoi(buffer) : -1; // Convert and return integer
+ }
+
+ float parseFloat()
+ {
+     char buffer[16]; // Buffer to store ASCII float representation
+     int index = 0;
+     bool hasDecimal = false; // Track if a decimal point exists
+ 
+     for (int i = 0; i < rxMsg.data_length_code; i++)
+     {
+         char incomingChar = rxMsg.data[i];
+ 
+         if (isdigit(incomingChar) || (incomingChar == '.' && !hasDecimal))
+         {
+             if (incomingChar == '.')
+                 hasDecimal = true;
+ 
+             if (index < sizeof(buffer) - 1)
+             {
+                 buffer[index++] = incomingChar;
+             }
+         }
+         else if (index > 0)
+         {
+             // Stop if a non-numeric character is encountered after digits
+             break;
+         }
+     }
+ 
+     buffer[index] = '\0'; // Null-terminate string
+ 
+     return (index > 0) ? atof(buffer) : -1.0; // Convert and return float
+ }
+ 
 }
 
 
@@ -459,10 +507,10 @@ void CAN_Task_Code(void *pvParameters)
 
       // Pedal Sensors Case
       case gasPedalPercentage_ID:
-        all_data.pedal_data.gas = CAN.parseInt();
-        // Figure this out
-        Serial.print("gas pedal received val: ");
-        Serial.println(all_data.pedal_data.gas);
+      Serial.print("gas pedal received val: ");
+      Serial.println(CAN.parseInt());
+        //all_data.pedal_data.gas = CAN.parseInt();
+       
         current_recv_data_points |= PEDAL_DATA;
         break;
 
