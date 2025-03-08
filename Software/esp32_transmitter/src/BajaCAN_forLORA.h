@@ -118,18 +118,26 @@ public:
 
   // Transmit Functions
 
-  bool beginPacket(int id, int length, bool extended)
+  bool beginPacket(int id, int length, bool rtr)
   {
-    // Prepare CAN message
+    // Clear the message structure to avoid uninitialized data
+    memset(&txMsg, 0, sizeof(twai_message_t));
+
+    // Set the identifier
     txMsg.identifier = id;
-    txMsg.extd = extended ? 1 : 0;
-    txMsg.data_length_code = length;
+    txMsg.extd = 0;          // Default to standard ID; extended IDs should be handled separately
+    txMsg.rtr = rtr ? 1 : 0; // Correctly assign RTR flag
+
+    // RTR frames should not have data, so enforce DLC = 0
+    txMsg.data_length_code = rtr ? 0 : length;
+
+
     return true; // Indicate success
   }
 
   bool endPacket()
   {
-    // Send the prepared CAN message
+    // Transmit the prepared CAN message
     if (twai_transmit(&txMsg, pdMS_TO_TICKS(1000)) == ESP_OK)
     {
       Serial.println("Message sent");
@@ -165,69 +173,66 @@ public:
     return rxMsg.identifier; // Return the received packet ID
   }
 
- // New parseInt() function that extracts multi-digit numbers
- int parseInt()
- {
-   char buffer[10];  // Buffer to store ASCII digits
-   int index = 0;    // Keeps track of buffer position
+  // New parseInt() function that extracts multi-digit numbers
+  int parseInt()
+  {
+    char buffer[10]; // Buffer to store ASCII digits
+    int index = 0;   // Keeps track of buffer position
 
-   for (int i = 0; i < rxMsg.data_length_code; i++)
-   {
-     char incomingChar = rxMsg.data[i];
+    for (int i = 0; i < rxMsg.data_length_code; i++)
+    {
+      char incomingChar = rxMsg.data[i];
 
-     if (isdigit(incomingChar))
-     {
-       if (index < sizeof(buffer) - 1)
-       {
-         buffer[index++] = incomingChar;
-       }
-     }
-     else if (index > 0)
-     {
-       // Stop if a non-digit is encountered after digits have been collected
-       break;
-     }
-   }
+      if (isdigit(incomingChar))
+      {
+        if (index < sizeof(buffer) - 1)
+        {
+          buffer[index++] = incomingChar;
+        }
+      }
+      else if (index > 0)
+      {
+        // Stop if a non-digit is encountered after digits have been collected
+        break;
+      }
+    }
 
-   buffer[index] = '\0';  // Null-terminate string
+    buffer[index] = '\0'; // Null-terminate string
 
-   return (index > 0) ? atoi(buffer) : -1; // Convert and return integer
- }
+    return (index > 0) ? atoi(buffer) : -1; // Convert and return integer
+  }
 
- float parseFloat()
- {
-     char buffer[16]; // Buffer to store ASCII float representation
-     int index = 0;
-     bool hasDecimal = false; // Track if a decimal point exists
- 
-     for (int i = 0; i < rxMsg.data_length_code; i++)
-     {
-         char incomingChar = rxMsg.data[i];
- 
-         if (isdigit(incomingChar) || (incomingChar == '.' && !hasDecimal))
-         {
-             if (incomingChar == '.')
-                 hasDecimal = true;
- 
-             if (index < sizeof(buffer) - 1)
-             {
-                 buffer[index++] = incomingChar;
-             }
-         }
-         else if (index > 0)
-         {
-             // Stop if a non-numeric character is encountered after digits
-             break;
-         }
-     }
- 
-     buffer[index] = '\0'; // Null-terminate string
- 
-     return (index > 0) ? atof(buffer) : -1.0; // Convert and return float
- }
- 
-}
+  float parseFloat()
+  {
+    char buffer[16]; // Buffer to store ASCII float representation
+    int index = 0;
+    bool hasDecimal = false; // Track if a decimal point exists
 
+    for (int i = 0; i < rxMsg.data_length_code; i++)
+    {
+      char incomingChar = rxMsg.data[i];
+
+      if (isdigit(incomingChar) || (incomingChar == '.' && !hasDecimal))
+      {
+        if (incomingChar == '.')
+          hasDecimal = true;
+
+        if (index < sizeof(buffer) - 1)
+        {
+          buffer[index++] = incomingChar;
+        }
+      }
+      else if (index > 0)
+      {
+        // Stop if a non-numeric character is encountered after digits
+        break;
+      }
+    }
+
+    buffer[index] = '\0'; // Null-terminate string
+
+    return (index > 0) ? atof(buffer) : -1.0; // Convert and return float
+  }
 
 private:
   twai_message_t txMsg;
@@ -378,15 +383,11 @@ void CAN_Task_Code(void *pvParameters);
 void setupCAN()
 {
 
-  Serial.println("In setupCAN");
-
   memset(&all_data, 0, sizeof(all_data)); // initalize data variable to 0
 
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_1, GPIO_NUM_38, TWAI_MODE_NORMAL);
   twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
   twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-
-  Serial.println("Done three config steps");
 
   if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK)
   {
@@ -396,8 +397,6 @@ void setupCAN()
       Serial.println("CAN driver started");
     }
   }
-
-
 
   // create a task that will be executed in the CAN_Task_Code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
@@ -430,6 +429,10 @@ void CAN_Task_Code(void *pvParameters)
 
     if ((packetSize || CAN.packetId() != -1) && (packetSize != 0))
     {
+
+      Serial.print("Packet received with id");
+      Serial.println(packetId);
+
       // received a packet
       packetId = CAN.packetId(); // Get the packet ID
 
@@ -507,10 +510,7 @@ void CAN_Task_Code(void *pvParameters)
 
       // Pedal Sensors Case
       case gasPedalPercentage_ID:
-      Serial.print("gas pedal received val: ");
-      Serial.println(CAN.parseInt());
-        //all_data.pedal_data.gas = CAN.parseInt();
-       
+        all_data.pedal_data.gas = CAN.parseInt();
         current_recv_data_points |= PEDAL_DATA;
         break;
 
@@ -654,15 +654,17 @@ void CAN_Task_Code(void *pvParameters)
         statusBaseStation = CAN.parseInt();
         break;
       }
+
+
     }
 
     if ((millis() - lastCanSendTime) > canSendInterval)
     {
-/*
+
       lastCanSendTime = millis();
 
       // The following delay is placed before anything is sent so that any RTR's we send will be received back without issue
-      delay(canSendInterval / 2); // Delay for half of our send interval. This should allow Watchdog to reset during IDLE without interfering with the functionality of the program. For the default interval (100ms), we provide a 50ms delay
+     // delay(canSendInterval / 2); // Delay for half of our send interval. This should allow Watchdog to reset during IDLE without interfering with the functionality of the program. For the default interval (100ms), we provide a 50ms delay
 
       // send RTRs
 
@@ -681,10 +683,7 @@ void CAN_Task_Code(void *pvParameters)
 
       CAN.beginPacket(statusDAS_ID, 3, true);
       CAN.endPacket();
-      break;
 
-      */
     }
-      
   }
 }
