@@ -403,7 +403,6 @@ void heltec_setup() {
     heltec_display_power(true);
     display.init();
     display.setContrast(255);
-    display.flipScreenVertically();
   #endif
 }
 
