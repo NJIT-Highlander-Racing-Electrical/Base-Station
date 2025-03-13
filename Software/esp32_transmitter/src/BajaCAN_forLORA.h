@@ -383,6 +383,8 @@ void CAN_Task_Code(void *pvParameters);
 void setupCAN()
 {
 
+  Serial.println("Beginning CAN setup");
+
   memset(&all_data, 0, sizeof(all_data)); // initalize data variable to 0
 
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_1, GPIO_NUM_38, TWAI_MODE_NORMAL);
@@ -410,6 +412,9 @@ void setupCAN()
 
   // Delay for stability; may not be necessary but only executes once
   delay(500);
+
+  Serial.println("Finished CAN Setup");
+
 }
 
 // CAN_Task executes on secondary core of ESP32 and its sole function is CAN
@@ -430,7 +435,7 @@ void CAN_Task_Code(void *pvParameters)
     if ((packetSize || CAN.packetId() != -1) && (packetSize != 0))
     {
 
-      Serial.print("Packet received with id");
+      Serial.print("Packet received with ID 0x");
       Serial.println(packetId);
 
       // received a packet
@@ -660,6 +665,8 @@ void CAN_Task_Code(void *pvParameters)
 
     if ((millis() - lastCanSendTime) > canSendInterval)
     {
+
+      Serial.println("Sending out RTRs Health Checks to Subsystems");
 
       lastCanSendTime = millis();
 

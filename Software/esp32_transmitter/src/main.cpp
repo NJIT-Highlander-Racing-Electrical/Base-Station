@@ -13,7 +13,7 @@
 // max 22
 #define TRANSMIT_POWER 0
 
-#define RADIO_TEST
+//#define RADIO_TEST
 
 union crc_value
 {
@@ -155,6 +155,8 @@ void loop()
 	delay(250); // just delay for now...
 
 	char buf[100];
+
+	Serial.println("Attempting to send packet");
 
 	if (send_packet(current_recv_data_points, &all_data) != RADIOLIB_ERR_NONE)
 	{

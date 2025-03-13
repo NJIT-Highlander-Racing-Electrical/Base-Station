@@ -77,6 +77,8 @@ void loop_wifi(void*) {
 			char buf[200];
 			make_csv(buf, 200, currentData);
 
+			Serial.println(buf);
+
 			for(int i = 0; i < MAX_CLIENTS; ++i) {
 				WiFiClient *client = clients[i];
 				if(client) {
@@ -101,6 +103,8 @@ void setup() {
 	RadioLibCRCInstance.poly = 0x755B;
 	RadioLibCRCInstance.init = 0xFFFF;
 	RadioLibCRCInstance.out = 0x0000;
+
+Serial.begin(115200);
 
 	heltec_setup();
 	heltec_ve(true);
