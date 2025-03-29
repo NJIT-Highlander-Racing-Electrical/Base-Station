@@ -436,7 +436,7 @@ void CAN_Task_Code(void *pvParameters)
     {
 
       Serial.print("Packet received with ID 0x");
-      Serial.println(packetId);
+      Serial.println(packetId, HEX);
 
       // received a packet
       packetId = CAN.packetId(); // Get the packet ID
