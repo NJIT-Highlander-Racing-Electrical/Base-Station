@@ -131,7 +131,6 @@ public:
     // RTR frames should not have data, so enforce DLC = 0
     txMsg.data_length_code = rtr ? 0 : length;
 
-
     return true; // Indicate success
   }
 
@@ -166,6 +165,21 @@ public:
       return rxMsg.data_length_code; // Return packet size
     }
     return 0; // No packet received
+  }
+
+  // Overload for uint8_t
+  void print(uint8_t value)
+  {
+    char buffer[4];                                          // max "255" + null terminator
+    int len = snprintf(buffer, sizeof(buffer), "%u", value); // Convert integer to ASCII string
+
+    // Write into txMsg.data
+    for (int i = 0; i < len && i < 8; i++)
+    {
+      txMsg.data[i] = buffer[i];
+    }
+
+    txMsg.data_length_code = len; // Update DLC accordingly
   }
 
   int packetId()
@@ -414,7 +428,6 @@ void setupCAN()
   delay(500);
 
   Serial.println("Finished CAN Setup");
-
 }
 
 // CAN_Task executes on secondary core of ESP32 and its sole function is CAN
@@ -654,13 +667,31 @@ void CAN_Task_Code(void *pvParameters)
         batteryPercentage = CAN.parseInt();
         break;
 
-        // Status Bit Case
-      case statusBaseStation_ID:
-        statusBaseStation = CAN.parseInt();
+      // Status Bit Case
+      case statusCVT_ID:
+        statusCVT = CAN.parseInt();
+        break;
+
+      // Status Bit Case
+      case statusDashboard_ID:
+        statusDashboard = CAN.parseInt();
+        break;
+
+      // Status Bit Case
+      case statusDAS_ID:
+        statusDAS = CAN.parseInt();
+        break;
+
+      // Status Bit Case
+      case statusWheels_ID:
+        statusWheels = CAN.parseInt();
+        break;
+
+      // Status Bit Case
+      case statusPedals_ID:
+        statusPedals = CAN.parseInt();
         break;
       }
-
-
     }
 
     if ((millis() - lastCanSendTime) > canSendInterval)
@@ -671,7 +702,7 @@ void CAN_Task_Code(void *pvParameters)
       lastCanSendTime = millis();
 
       // The following delay is placed before anything is sent so that any RTR's we send will be received back without issue
-     // delay(canSendInterval / 2); // Delay for half of our send interval. This should allow Watchdog to reset during IDLE without interfering with the functionality of the program. For the default interval (100ms), we provide a 50ms delay
+      // delay(canSendInterval / 2); // Delay for half of our send interval. This should allow Watchdog to reset during IDLE without interfering with the functionality of the program. For the default interval (100ms), we provide a 50ms delay
 
       // send RTRs
 
@@ -691,6 +722,11 @@ void CAN_Task_Code(void *pvParameters)
       CAN.beginPacket(statusDAS_ID, 3, true);
       CAN.endPacket();
 
+      Serial.println("Sending out my Status Bits to everyone else");
+
+      CAN.beginPacket(statusBaseStation_ID, 3, false);
+      CAN.print(statusBaseStation);
+      CAN.endPacket();
     }
   }
 }
