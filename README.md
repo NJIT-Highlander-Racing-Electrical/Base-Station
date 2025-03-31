@@ -9,6 +9,7 @@ Essentially, a wireless version of the dashboard on a PC. This will also require
 * Clean up unused code
 * Add comments for clarity
 * Add Serial output too for wired connection to SerialStudio
+* Complete visual design for parsing data in SerialStudio
 * Update to latest CAN driver
 * Add software that sees when the last time the Base Station received a status bit from each subsystem
     * This will allow us to recognize when a subsystem fails, even if the last status it sent before dying was healthy.
