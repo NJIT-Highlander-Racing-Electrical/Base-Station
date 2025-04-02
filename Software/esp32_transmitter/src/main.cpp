@@ -56,8 +56,11 @@ int16_t send_packet(sent_data_points_t sd, const baja_data_t *bt)
 	char buf[100];
 	memset(buf, 0, 100);
 
+	// take the new data points and their values and pack them into the byte array we will transmit
 	size_t byteCount = pack_data(buf, bt, sd);
 
+	// compute a checksum and put it in our packet because radiolib can't seem to
+	// put it in the packet on its own
 	union crc_value checksum;
 	checksum.intVal = RadioLibCRCInstance.checksum((const uint8_t *)buf, byteCount);
 
@@ -80,34 +83,9 @@ void loop()
 #ifdef RADIO_TEST
 	if (button.isSingleClick())
 	{
-		both.printf("Button %i\n", ++a);
-		/*
-				String data = "";
-				data.concat(a*a);
-				for(int i = 0; i < 10000; ++i) {
-					char num[7];
-					//data = "Hello world";
-					data = "";
-					data.concat(i);
-					//sprintf(num, "%i", i);
-					//strncpy(data, num, 6);
-					//data[6] = 'q';
-					//radio.transmit((const uint8_t*)data, 21, 0);
-					//radio.transmit((const uint8_t*)data, 74, 0);
+		both.printf("Button %i\n", ++a);	
 
-					union crc_value checksum;
-					checksum.intVal = RadioLibCRCInstance.checksum((const uint8_t*)data.c_str(), data.length()+1);
-
-					char *fullStr = (char*)malloc(data.length() + 1 + 2);
-					fullStr[data.length()+1] = checksum.strVal[0];
-					fullStr[data.length()+2] = checksum.strVal[1]; // we will ignore the last 2 bits of the checksum
-					//both.println(RadioLibCRCInstance.checksum((const uint8_t*)data.c_str(), data.length()+1));
-					strncpy(fullStr, data.c_str(), data.length() + 1);
-					radio.transmit((const uint8_t*)fullStr, data.length()+1 + 2, 0);
-					free(fullStr);
-					//delay(250);
-				}
-		*/
+		// send some fake data a couple hundred times
 
 		baja_data_t bt;
 		sent_data_points_t sd = 0;
@@ -123,22 +101,6 @@ void loop()
 			if (i % 10 == 0)
 				sd |= WHEEL_SPEEDS;
 
-			/*memset(buf, 0, 100);
-			size_t bytes = pack_data(buf, &bt, sd);
-			//both.println(bytes);
-			delay(250);
-
-			union crc_value checksum;
-			checksum.intVal = RadioLibCRCInstance.checksum((const uint8_t*)buf, bytes);
-
-			char *fullStr = (char*)malloc(bytes + 2);
-			memcpy((void*)fullStr, (const void*)buf, bytes);
-			fullStr[bytes] = checksum.strVal[0];
-			fullStr[bytes + 1] = checksum.strVal[1];
-
-			radio.transmit((const uint8_t*)fullStr, bytes + 2, 0);
-
-			free(fullStr);*/
 			if (send_packet(sd, &bt) != RADIOLIB_ERR_NONE)
 			{
 				both.println("Problems!!!!");
@@ -158,6 +120,7 @@ void loop()
 
 	Serial.println("Attempting to send packet");
 
+	// all_data is in BajaCAN_forLORA.h
 	if (send_packet(current_recv_data_points, &all_data) != RADIOLIB_ERR_NONE)
 	{
 		both.println("Problems!!!!");

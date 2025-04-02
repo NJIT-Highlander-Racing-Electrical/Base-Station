@@ -7,13 +7,27 @@
 int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 	baja_data_t sortedData;
 
+	// this contains which data points we received on this packet
 	sent_data_points_t newDataPoints = unpack_data(rxdata.data, &sortedData);
 
 	// even worse than the other stuff
 	static gps_lat_long_t gpsReference;
 	gps_lat_long_t newGpsData = process_gps_data(&sortedData, newDataPoints, &gpsReference);
 
-	// horrible
+	// there has to be a neater way to do this...
+	
+	// only print the stuff we just received, otherwise empty values for the csv
+	
+
+	/*
+	 *	buf += written;
+	 *	bufLen -= written;
+	 *
+	 *  the first line moves our pointer so that the next time we write to the buffer
+	 *  it is appended after what we just wrote
+	 *  
+	 *  the second line makes sure we don't write past the buffer
+	 */
 
 	if(newDataPoints & CVT_DATA) {
 		cvt_data_t cvt = sortedData.cvt_data;
