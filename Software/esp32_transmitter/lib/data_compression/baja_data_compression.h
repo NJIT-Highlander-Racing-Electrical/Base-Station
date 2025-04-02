@@ -70,7 +70,7 @@ typedef struct {
 #define GYRO_DATA_TOTAL_BITS 42
 #define GYRO_BITS 14
 typedef struct {
-	int16_t yaw : GYRO_BITS
+	int16_t yaw : GYRO_BITS;
 	int16_t pitch : GYRO_BITS;
 	int16_t roll : GYRO_BITS;
 } gyroscope_data_t;

@@ -187,6 +187,12 @@ public:
     return rxMsg.identifier; // Return the received packet ID
   }
 
+  bool packetRtr()
+  {
+    return rxMsg.rtr; // Return the RTR flag of the last received message
+  }
+
+
   // New parseInt() function that extracts multi-digit numbers
   int parseInt()
   {
