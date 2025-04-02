@@ -697,6 +697,12 @@ void CAN_Task_Code(void *pvParameters)
     if ((millis() - lastCanSendTime) > canSendInterval)
     {
 
+      Serial.println("Sending out my Status Bits to everyone else");
+
+      CAN.beginPacket(statusBaseStation_ID, 3, false);
+      CAN.print(statusBaseStation);
+      CAN.endPacket();
+
       Serial.println("Sending out RTRs Health Checks to Subsystems");
 
       lastCanSendTime = millis();
@@ -722,11 +728,6 @@ void CAN_Task_Code(void *pvParameters)
       CAN.beginPacket(statusDAS_ID, 3, true);
       CAN.endPacket();
 
-      Serial.println("Sending out my Status Bits to everyone else");
-
-      CAN.beginPacket(statusBaseStation_ID, 3, false);
-      CAN.print(statusBaseStation);
-      CAN.endPacket();
     }
   }
 }
