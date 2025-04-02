@@ -312,10 +312,14 @@ const int gpsDateYear_ID = 0x36;
 const int gpsAltitude_ID = 0x37;
 const int gpsHeading_ID = 0x38;
 const int gpsVelocity_ID = 0x39;
-const int sdLoggingActive_ID = 0x3A;
+const int batteryPercentage_ID = 0x3A;
 
-// Power CAN IDs
-const int batteryPercentage_ID = 0x47;
+
+// Dashboard CAN IDs
+const int sdLoggingActive_ID = 0x42;
+const int dataScreenshotFlag_ID = 0x43;
+
+
 
 // Status Bits
 const int statusCVT_ID = 0x5A;
@@ -372,11 +376,13 @@ volatile int gpsDateDay;
 volatile int gpsDateYear;
 volatile int gpsAltitude;
 volatile int gpsHeading;
-volatile float gpsVelocity;
-volatile bool sdLoggingActive;
+volatile int gpsVelocity;
+volatile int batteryPercentage;
 
-// Power CAN
-int batteryPercentage;
+// Dashboard CAN
+volatile int sdLoggingActive;
+volatile int dataScreenshotFlag;
+
 
 // Status Bits
 volatile uint8_t statusCVT;
@@ -445,7 +451,7 @@ void CAN_Task_Code(void *pvParameters)
     int packetSize = CAN.parsePacket();
     int packetId;
 
-    if ((packetSize || CAN.packetId() != -1) && (packetSize != 0))
+    if ((packetSize > 0) || (CAN.packetRtr() && CAN.packetId() != -1))
     {
 
       Serial.print("Packet received with ID 0x");
@@ -654,18 +660,26 @@ void CAN_Task_Code(void *pvParameters)
 
       // DAS GPS Velocity Case
       case gpsVelocity_ID:
-        gpsVelocity = CAN.parseFloat();
+        gpsVelocity = CAN.parseInt();
         break;
 
-      // DAS SD Logging Active Case
-      case sdLoggingActive_ID:
-        sdLoggingActive = CAN.parseInt();
-        break;
-
-      // Battery Percentage Case
+      // DAS Battery Percentage Case
       case batteryPercentage_ID:
         batteryPercentage = CAN.parseInt();
         break;
+		
+	  // Dashboard SD Logging Active Case
+      case sdLoggingActive_ID:
+        sdLoggingActive = CAN.parseInt();
+        break;
+		
+      // Dashboard Data Screenshot Flag Case
+      case dataScreenshotFlag_ID:
+        dataScreenshotFlag = CAN.parseInt();
+        break;
+
+		
+		
 
       // Status Bit Case
       case statusCVT_ID:
