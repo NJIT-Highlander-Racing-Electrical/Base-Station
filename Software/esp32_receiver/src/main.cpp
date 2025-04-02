@@ -1,5 +1,10 @@
 #include <heltec_unofficial.h>
 
+#include <stddef.h>
+#include <stdint.h>
+#include "util.h"
+#include "csv.h"
+
 #define FREQUENCY 905.2
 //#define BANDWIDTH 125
 //#define SPREADING_FACTOR 9
@@ -24,16 +29,6 @@ bool usingWifi = false;
 WiFiServer server(23); // serial studio defaults to port 23 (telnet port) 
 
 QueueHandle_t queue_test;
-
-typedef struct {
-	size_t length;
-	char *data;
-} rxdata_t;
-
-union crc_value {
-	uint16_t intVal;
-	char strVal[2];
-};
 
 void send_stuff(WiFiClient *client) {
 	const char *thing = "HTTP/1.1 200 OK\nContent-type: text/html\nConnection: close\n\nI am some very useful data\n";
@@ -63,22 +58,28 @@ void loop_wifi(void*) {
 			}
 		}
 
-		if(newData && currentData.data) free(currentData.data - 2/*lazy*/);
+		// free old data before receiving new
+		if(newData && currentData.data) free(currentData.data);
 		newData = false;
-		rxdata_t rxdata;
-		if(xQueueReceive(queue_test, &rxdata, 0) == pdPASS) {
+		if(xQueueReceive(queue_test, &currentData, 0) == pdPASS) {
 			newData = true;
-			currentData = rxdata;
-			rxdata_t rxdata2;
-			if(xQueuePeek(queue_test, &rxdata2, 0) == pdPASS) {
-				// there's more
-				both.println("m");
-			}
 		} else {
 			// TODO: rxdata was null?
 		}
 
+		if(uxQueueMessagesWaiting(queue_test) > 2) {
+			both.println("Falling behind, message skipping");
+			xQueueReset(queue_test);
+		}
+
 		if(newData) {
+
+			char buf[200];
+			make_csv(buf, 200, currentData);
+
+			Serial.println(buf);
+
+			// send the csv we just made to all the clients
 			for(int i = 0; i < MAX_CLIENTS; ++i) {
 				WiFiClient *client = clients[i];
 				if(client) {
@@ -87,8 +88,7 @@ void loop_wifi(void*) {
 						clients[i] = NULL; // remove disconnected client from array
 						continue;
 					}
-					client->println(currentData.data);
-					//send_stuff(client);
+					client->println(buf);
 				}
 			}
 		}
@@ -102,6 +102,8 @@ void setup() {
 	RadioLibCRCInstance.poly = 0x755B;
 	RadioLibCRCInstance.init = 0xFFFF;
 	RadioLibCRCInstance.out = 0x0000;
+
+Serial.begin(115200);
 
 	heltec_setup();
 	heltec_ve(true);
@@ -133,6 +135,7 @@ void setup() {
 				10000,
 				NULL,
 				0,
+
 				&wifiHandle
 			   );
 	} else {
@@ -153,25 +156,28 @@ void loop() {
 		both.println("o");
 	}
 
+	// rxFlag is set by a radio interrupt if we received something 
 	if(rxFlag) {
 		size_t packetLen = radio.getPacketLength();
 
-		char *rxdata = (char*)malloc(packetLen);
-		if(!rxdata) {// TODO: malloc failed	
+		// this will contain the useful data and the crc
+		char *allrxdata = (char*)malloc(packetLen);
+		if(!allrxdata) {// TODO: malloc failed	
 		}
 
-		radio.readData((uint8_t*)rxdata, packetLen);
+		radio.readData((uint8_t*)allrxdata, packetLen);
 
+		// load the received checksum into our union to check it
 		union crc_value checksum;
-		checksum.strVal[0] = rxdata[0];
-		checksum.strVal[1] = rxdata[1];
+		checksum.strVal[0] = allrxdata[packetLen - 2];
+		checksum.strVal[1] = allrxdata[packetLen - 1];
 
-		rxdata += 2; // yucky
-		packetLen -= 2; // also yucky
-
-		bool passed = checksum.intVal == (uint16_t)RadioLibCRCInstance.checksum((const uint8_t*)rxdata, packetLen);
+		bool passed = checksum.intVal == (uint16_t)RadioLibCRCInstance.checksum((const uint8_t*)allrxdata, packetLen - 2);
 
 		if(!passed) {
+			// this code will run if we received a packet that failed the checksum
+			// really no reason to do anything, a corrupted packet is as good as if we didn't get it at all
+
 			/*rxdata_t rxdata_struct;
 			const char *errmsg = "  Packet corrupted";
 			char *errmsg_copy = (char*)malloc(19);
@@ -186,11 +192,19 @@ void loop() {
 			//both.printf("SNR: %.2f\n", radio.getSNR());
 			//both.printf("%s\n", rxdata);
 
-			rxdata_t rxdata_struct;
-			rxdata_struct.length = packetLen;
-			//both.println(packetLen);
+			// packetLen is the length of the data plus the 2 byte checksum
+			size_t dataLen = packetLen - 2;
 
-			rxdata_struct.data = rxdata; // the queue receiver is responsible for freeing this rxdata
+			rxdata_t rxdata_struct;
+			rxdata_struct.length = dataLen;
+
+			// this contains just the useful data (the crc at the end is gone)
+			char *rxdata = (char*)realloc((void*)allrxdata, dataLen);
+			if(rxdata == NULL) { // if this happens we're all screwed
+				both.println("bad bad bad");
+			}
+
+			rxdata_struct.data = rxdata; // the queue receiver is responsible for freeing the rxdata_struct.data
 						// if the queue overflows then oops memory leak TODO fix!!!!!
 			xQueueSendToBack(queue_test, &rxdata_struct, 0);
 		}

@@ -2,7 +2,7 @@
 #include "data_compression.h"
 #include <stdlib.h>
 
-void pack_all_data(char *buffer, 
+/*void pack_all_data(char *buffer, 
 		const cvt_data_t *cvt_data, 
 		const wheel_speeds_t *wheel_speeds, 
 		const suspension_displacements_t *suspension_displacements, 
@@ -99,7 +99,7 @@ void unpack_all_data(const char *buffer,
 	gps_pos_diff->latitude = read_intx(bits, &i, GPS_POS_DIFF_BITS);
 	gps_pos_diff->longitude = read_intx(bits, &i, GPS_POS_DIFF_BITS);
 
-}
+}*/
 
 size_t pack_data(char *buffer, const baja_data_t *baja_data, const sent_data_points_t sent_data_points) {
 
