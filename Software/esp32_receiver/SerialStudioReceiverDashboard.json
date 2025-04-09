@@ -3,7 +3,7 @@
     ],
     "decoder": 0,
     "frameEnd": "\\n",
-    "frameParser": "/**\n * This function splits a data frame using the project-specified separator,\n * allowing you to customize frame parsing for different project requirements.\n *\n * Global variables can maintain a constant output array, enabling a single\n * Serial Studio project to display information consistently, even with varying\n * frame types.\n *\n * @param[in]  frame      The latest received frame as a string.\n * @param[in]  separator  The data separator defined in the JSON project.\n * @return     Array of strings containing the parsed frame elements.\n *\n * @note Only data within the delimiters is processed.\n * @note Declare global variables outside @c parse() for state/configuration.\n *\n * @example\n * Given frame: \"value1,value2,value3\", separator: \",\"\n * Returns: [\"value1\", \"value2\", \"value3\"]\n */\nfunction parse(frame, separator) {\n    return frame.split(separator);\n}\n",
+    "frameParser": "/**\n * Splits a data frame into an array of elements using a comma separator.\n *\n * Use this function to break a string (like \"value1,value2,value3\") into\n * individual pieces, which can then be displayed or processed in your project.\n *\n * @param[in]  frame   A string containing the data frame.\n *                     Example: \"value1,value2,value3\"\n *\n * @return     An array of strings with the split elements.\n *             Example: [\"value1\", \"value2\", \"value3\"]\n *\n * @note You can declare global variables outside this function if needed\n *       for storing settings or keeping state between calls.\n */\n \nvar lastFrame = null;\n \nfunction parse(frame) {\n    var stuff = frame.split(',');\n    for(var i = 0; i < frame.length; i++) {\n        if(stuff[i] == \"\") {\n            console.log(\"Keeping element \" + i + \": \" + lastFrame[i]);\n            stuff[i] = lastFrame[i];          \n        }\n    }\n    lastFrame = stuff;\n    console.log(\"received \" + JSON.stringify(stuff));\n    return stuff;\n}\n",
     "frameStart": "\\n",
     "groups": [
         {
@@ -364,7 +364,7 @@
                     "min": 0,
                     "title": "Front Left Wheel Speed",
                     "units": "RPM",
-                    "value": "",
+                    "value": "--.--",
                     "widget": "bar"
                 },
                 {
@@ -381,7 +381,7 @@
                     "min": 0,
                     "title": "Front Right Wheel Speed",
                     "units": "RPM",
-                    "value": "",
+                    "value": "--.--",
                     "widget": "bar"
                 },
                 {
@@ -398,7 +398,7 @@
                     "min": 0,
                     "title": "Rear Left Wheel Speed",
                     "units": "RPM",
-                    "value": "",
+                    "value": "--.--",
                     "widget": "bar"
                 },
                 {
@@ -415,7 +415,7 @@
                     "min": 0,
                     "title": "Rear Right Wheel Speed",
                     "units": "RPM",
-                    "value": "",
+                    "value": "--.--",
                     "widget": "bar"
                 }
             ],
