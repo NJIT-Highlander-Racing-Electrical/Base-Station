@@ -11,7 +11,7 @@
 #define SPREADING_FACTOR 7
 
 // max 22
-#define TRANSMIT_POWER 0
+#define TRANSMIT_POWER 22
 
 //#define RADIO_TEST
 
