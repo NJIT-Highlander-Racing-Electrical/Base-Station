@@ -114,7 +114,6 @@ void loop()
 
 	// can task will populate this as we receive data points
 	current_recv_data_points = 0;
-	delay(250); // just delay for now...
 
 	char buf[100];
 
