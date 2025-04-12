@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "util.h"
 #include "baja_data_compression.h"
-#include "gps.h"
+//#include "gps.h"
 
 int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 	baja_data_t sortedData;
@@ -11,8 +11,6 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 	sent_data_points_t newDataPoints = unpack_data(rxdata.data, &sortedData);
 
 	// even worse than the other stuff
-	static gps_lat_long_t gpsReference;
-	gps_lat_long_t newGpsData = process_gps_data(&sortedData, newDataPoints, &gpsReference);
 
 	// there has to be a neater way to do this...
 	
@@ -28,6 +26,10 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 	 *  
 	 *  the second line makes sure we don't write past the buffer
 	 */
+
+	size_t written = snprintf(buf, bufLen, "BEGIN");
+	buf += written;
+	bufLen -= written;
 
 	if(newDataPoints & CVT_DATA) {
 		cvt_data_t cvt = sortedData.cvt_data;
@@ -103,8 +105,9 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 
 	}*/
 
-	if(newGpsData.latitude != 0 || newGpsData.longitude != 0) {
-		size_t written = snprintf(buf, bufLen, "%i,%i,", newGpsData.latitude, newGpsData.longitude);
+	if(newDataPoints & GPS_LAT_LONG) {
+		gps_lat_long_t gps = sortedData.gps_pos;
+		size_t written = snprintf(buf, bufLen, "%.6f,%.6f,", gps.latitude / 100000.f, gps.longitude / 100000.f);
 		buf += written;
 		bufLen -= written;
 	} else {
@@ -116,6 +119,10 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 	if(newDataPoints & GPS_OTHER_DATA) {
 
 	}
+
+	written = snprintf(buf, bufLen, "END");
+	buf += written;
+	bufLen -= written;
 
 	// I forget why this is here, shouldn't it screw up the first char of the buf?
 	buf[0] = '\0';

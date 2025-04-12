@@ -227,10 +227,15 @@ public:
     char buffer[16]; // Buffer to store ASCII float representation
     int index = 0;
     bool hasDecimal = false; // Track if a decimal point exists
+    bool isNegative = false;
 
     for (int i = 0; i < rxMsg.data_length_code; i++)
     {
       char incomingChar = rxMsg.data[i];
+
+      if(incomingChar == '-') {
+          isNegative = true;
+      }
 
       if (isdigit(incomingChar) || (incomingChar == '.' && !hasDecimal))
       {
@@ -251,7 +256,7 @@ public:
 
     buffer[index] = '\0'; // Null-terminate string
 
-    return (index > 0) ? atof(buffer) : -1.0; // Convert and return float
+    return (index > 0) ? (isNegative ? -atof(buffer) : atof(buffer)) : -1.0; // Convert and return float
   }
 
 private:
@@ -405,7 +410,6 @@ volatile uint8_t statusWheels;
 volatile uint8_t statusPedals;
 
 baja_data_t all_data;
-gps_lat_long_t gps_data;
 sent_data_points_t current_recv_data_points;
 
 // Declaraction for CAN_Task_Code second core program
@@ -420,7 +424,7 @@ void setupCAN()
   memset(&all_data, 0, sizeof(all_data)); // initalize data variable to 0
 
   twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_1, GPIO_NUM_38, TWAI_MODE_NORMAL);
-  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_1MBITS();
   twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
   if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK)
@@ -562,7 +566,7 @@ void CAN_Task_Code(void *pvParameters)
 	break;
 
       case rearBrakePressure_ID:
-	all_data.pedal_data.rearPressure = CAN.praseInt();
+	all_data.pedal_data.rearPressure = CAN.parseInt();
 	current_recv_data_points |= PEDAL_DATA;
 	break;
       
@@ -631,13 +635,13 @@ void CAN_Task_Code(void *pvParameters)
         // TODO: gps relative/absolute stuff...
         // DAS GPS Position Case
       case gpsLatitude_ID:
-        gps_data.latitude = CAN.parseFloat() * 100000;
+        all_data.gps_pos.latitude = CAN.parseFloat() * 100000;
         current_recv_data_points |= GPS_LAT_LONG;
         break;
 
       // DAS GPS Position Case
       case gpsLongitude_ID:
-        gps_data.longitude = CAN.parseFloat() * 100000;
+        all_data.gps_pos.longitude = CAN.parseFloat() * 100000;
         current_recv_data_points |= GPS_LAT_LONG;
         break;
 

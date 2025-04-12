@@ -7,8 +7,11 @@
 // #define BANDWIDTH 125
 // #define SPREADING_FACTOR 9
 
-#define BANDWIDTH 500
-#define SPREADING_FACTOR 7
+#define BANDWIDTH_FAST 500
+#define SPREADING_FACTOR_FAST 7
+
+#define BANDWIDTH_SLOW 125
+#define SPREADING_FACTOR_SLOW 9
 
 // probably right but don't count on it
 #define SPEED_SWITCH_PIN 39
@@ -17,6 +20,8 @@
 #define TRANSMIT_POWER 22
 
 //#define RADIO_TEST
+
+bool speedSwitchState;
 
 union crc_value
 {
@@ -38,9 +43,12 @@ void setup()
 	heltec_setup();
 	heltec_ve(true);
 
+	pinMode(SPEED_SWITCH_PIN, INPUT_PULLUP);
+        speedSwitchState = digitalRead(SPEED_SWITCH_PIN);
+
 	both.println("Radio init");
-	// radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR);
-	radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR, 7, 0x13, 0, 8);
+	radio.begin(FREQUENCY, speedSwitchState ? BANDWIDTH_SLOW : BANDWIDTH_FAST, speedSwitchState ? SPREADING_FACTOR_SLOW : SPREADING_FACTOR_FAST, 7, 0x13, 0, 8);
+	both.println(speedSwitchState ? "SLOW" : "FAST");
 	if (radio.setCRC(0) == RADIOLIB_ERR_INVALID_CRC_CONFIGURATION)
 	{
 		both.println("bad bad bad");
@@ -83,6 +91,20 @@ void loop()
 {
 	heltec_loop();
 
+	bool newSwitchState;
+        if((newSwitchState = digitalRead(SPEED_SWITCH_PIN)) != speedSwitchState) {
+                speedSwitchState = newSwitchState;
+                if(!speedSwitchState) {
+                        radio.setBandwidth(BANDWIDTH_FAST);
+                        radio.setSpreadingFactor(SPREADING_FACTOR_FAST);
+			both.println("-> FAST");
+                } else {
+                        radio.setBandwidth(BANDWIDTH_SLOW);
+                        radio.setSpreadingFactor(SPREADING_FACTOR_SLOW);
+			both.println("-> SLOW");
+                }
+        }
+
 #ifdef RADIO_TEST
 	if (button.isSingleClick())
 	{
@@ -93,14 +115,24 @@ void loop()
 		baja_data_t bt;
 		sent_data_points_t sd = 0;
 		sd |= CVT_DATA;
+		sd |= PEDAL_DATA;
+		sd |= GPS_LAT_LONG;
 
 		char buf[100];
 		for (int i = 0; i < 500; ++i)
 		{
+
+			bt.gps_pos.latitude = 16123456;
+			bt.gps_pos.longitude = -16654321;
 			bt.cvt_data.primary = 22;
 			bt.cvt_data.secondary = i;
 			bt.cvt_data.temperature = 37;
 			bt.wheel_speeds.fr = i * 2;
+
+			bt.pedal_data.gas = 1;
+			bt.pedal_data.brake = 2;
+			bt.pedal_data.frontPressure = 3;
+			bt.pedal_data.rearPressure = 4;
 			if (i % 10 == 0)
 				sd |= WHEEL_SPEEDS;
 
@@ -120,7 +152,11 @@ void loop()
 
 	char buf[100];
 
+	delay(100);
+
 	Serial.println("Attempting to send packet");
+	Serial.print("sd = ");
+	Serial.println(current_recv_data_points);
 
 	// all_data is in BajaCAN_forLORA.h
 	if (send_packet(current_recv_data_points, &all_data) != RADIOLIB_ERR_NONE)

@@ -11,10 +11,13 @@
 
 
 // probably right, don't count on it
-#define SPEED_SWTICH_PIN 7
+#define SPEED_SWITCH_PIN 7
 
-#define BANDWIDTH 500
-#define SPREADING_FACTOR 7
+#define BANDWIDTH_FAST 500
+#define SPREADING_FACTOR_FAST 7
+
+#define BANDWIDTH_SLOW 125
+#define SPREADING_FACTOR_SLOW 9
 
 // max 22
 #define TRANSMIT_POWER 0
@@ -29,6 +32,8 @@ void rx_callback() {
 }
 
 bool usingWifi = false;
+
+bool speedSwitchState;
 
 WiFiServer server(23); // serial studio defaults to port 23 (telnet port) 
 
@@ -111,9 +116,14 @@ Serial.begin(115200);
 
 	heltec_setup();
 	heltec_ve(true);
+	
+	pinMode(SPEED_SWITCH_PIN, INPUT_PULLUP);
+	speedSwitchState = digitalRead(SPEED_SWITCH_PIN);
 
 	both.print("Radio init... ");
-	radio.begin(FREQUENCY, BANDWIDTH, SPREADING_FACTOR, 7, 0x13, 0, 8);
+	radio.begin(FREQUENCY, speedSwitchState ? BANDWIDTH_SLOW : BANDWIDTH_FAST, speedSwitchState ? SPREADING_FACTOR_SLOW : SPREADING_FACTOR_FAST, 7, 0x13, 0, 8);
+	both.println(speedSwitchState ? "SLOW" : "FAST");
+
 	if(radio.setCRC(0) == RADIOLIB_ERR_INVALID_CRC_CONFIGURATION) {
 		both.println("bad bad bad");
 	}
@@ -158,6 +168,20 @@ void loop() {
 
 	if(overflow) {
 		both.println("o");
+	}
+
+	bool newSwitchState;
+	if((newSwitchState = digitalRead(SPEED_SWITCH_PIN)) != speedSwitchState) {
+		speedSwitchState = newSwitchState;
+		if(!speedSwitchState) {
+			radio.setBandwidth(BANDWIDTH_FAST);
+			radio.setSpreadingFactor(SPREADING_FACTOR_FAST);
+			display.println("-> FAST");
+		} else {
+			radio.setBandwidth(BANDWIDTH_SLOW);
+			radio.setSpreadingFactor(SPREADING_FACTOR_SLOW);
+			display.println("-> SLOW");
+		}
 	}
 
 	// rxFlag is set by a radio interrupt if we received something 

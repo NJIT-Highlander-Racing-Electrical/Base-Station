@@ -129,7 +129,7 @@ size_t pack_data(char *buffer, const baja_data_t *baja_data, const sent_data_poi
 	}
 
 	if(sent_data_points & GPS_LAT_LONG) {
-		data_size_bits += GPS_POS_DIFF_TOTAL_BITS;
+		data_size_bits += GPS_POS_TOTAL_BITS;
 	}
 
 	char *bits = (char*)malloc(data_size_bits);
@@ -182,8 +182,8 @@ size_t pack_data(char *buffer, const baja_data_t *baja_data, const sent_data_poi
 	}
 
 	if(sent_data_points & GPS_LAT_LONG) {
-		load_intx(bits, &i, GPS_POS_DIFF_BITS, baja_data->gps_pos_diff.latitude);
-		load_intx(bits, &i, GPS_POS_DIFF_BITS, baja_data->gps_pos_diff.longitude);
+		load_intx(bits, &i, GPS_POS_BITS, baja_data->gps_pos.latitude);
+		load_intx(bits, &i, GPS_POS_BITS, baja_data->gps_pos.longitude);
 	}
 
 	pack_bits(buffer, bits, data_size_bits);
@@ -228,7 +228,7 @@ sent_data_points_t unpack_data(const char *buffer, baja_data_t *baja_data) {
 	}
 
 	if(recv_data_points & GPS_LAT_LONG) {
-		data_size_bits += GPS_POS_DIFF_TOTAL_BITS;
+		data_size_bits += GPS_POS_TOTAL_BITS;
 	}
 
 	char *bits = (char*)malloc(data_size_bits);
@@ -286,8 +286,8 @@ sent_data_points_t unpack_data(const char *buffer, baja_data_t *baja_data) {
 	}
 
 	if(recv_data_points & GPS_LAT_LONG) {
-		baja_data->gps_pos_diff.latitude = read_intx(bits, &i, GPS_POS_DIFF_BITS);
-		baja_data->gps_pos_diff.longitude = read_intx(bits, &i, GPS_POS_DIFF_BITS);
+		baja_data->gps_pos.latitude = read_intx(bits, &i, GPS_POS_BITS);
+		baja_data->gps_pos.longitude = read_intx(bits, &i, GPS_POS_BITS);
 	}
 	
 	free(bits);

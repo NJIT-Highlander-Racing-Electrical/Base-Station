@@ -18,8 +18,7 @@ typedef uint16_t sent_data_points_t;
 #define ACCEL_DATA         0b10000
 #define GYRO_DATA          0b100000
 #define GPS_LAT_LONG       0b1000000
-#define GPS_LAT_LONG_CONST 0b10000000
-#define GPS_OTHER_DATA     0b100000000
+#define GPS_OTHER_DATA     0b10000000
 
 // units: rpm, degrees ?
 #define CVT_DATA_TOTAL_BITS 26
@@ -78,17 +77,11 @@ typedef struct {
 	int16_t roll : GYRO_BITS;
 } gyroscope_data_t;
 
-#define GPS_POS_DIFF_TOTAL_BITS 28
-#define GPS_POS_DIFF_BITS 14
+#define GPS_POS_TOTAL_BITS 50
+#define GPS_POS_BITS 25
 typedef struct {
-	int16_t latitude : GPS_POS_DIFF_BITS;
-	int16_t longitude : GPS_POS_DIFF_BITS;
-} gps_lat_long_diff_t;
-
-#define GPS_POS_CONST_TOTAL_BITS 50
-typedef struct {
-	int32_t latitude : 25;
-	int32_t longitude : 25;
+	int32_t latitude : GPS_POS_BITS;
+	int32_t longitude : GPS_POS_BITS;
 } gps_lat_long_t;
 
 typedef struct {
@@ -98,8 +91,7 @@ typedef struct {
 	pedal_data_t pedal_data;
 	accelerometer_data_t accel_data;
 	gyroscope_data_t gyro_data;
-	gps_lat_long_diff_t gps_pos_diff;
-	gps_lat_long_t gps_pos_const;
+	gps_lat_long_t gps_pos;
 } baja_data_t;
 
 size_t pack_data(char *buffer, const baja_data_t *baja_data, const sent_data_points_t sent_data_points);

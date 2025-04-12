@@ -2,9 +2,10 @@
     "actions": [
     ],
     "decoder": 0,
-    "frameEnd": "\\n",
-    "frameParser": "/**\n * Splits a data frame into an array of elements using a comma separator.\n *\n * Use this function to break a string (like \"value1,value2,value3\") into\n * individual pieces, which can then be displayed or processed in your project.\n *\n * @param[in]  frame   A string containing the data frame.\n *                     Example: \"value1,value2,value3\"\n *\n * @return     An array of strings with the split elements.\n *             Example: [\"value1\", \"value2\", \"value3\"]\n *\n * @note You can declare global variables outside this function if needed\n *       for storing settings or keeping state between calls.\n */\n \nvar lastFrame = null;\n \nfunction parse(frame) {\n    var stuff = frame.split(',');\n    for(var i = 0; i < frame.length; i++) {\n        if(stuff[i] == \"\") {\n            console.log(\"Keeping element \" + i + \": \" + lastFrame[i]);\n            stuff[i] = lastFrame[i];          \n        }\n    }\n    lastFrame = stuff;\n    console.log(\"received \" + JSON.stringify(stuff));\n    return stuff;\n}\n",
-    "frameStart": "\\n",
+    "frameDetection": 1,
+    "frameEnd": "END",
+    "frameParser": "/**\n * Splits a data frame into an array of elements using a comma separator.\n *\n * Use this function to break a string (like \"value1,value2,value3\") into\n * individual pieces, which can then be displayed or processed in your project.\n *\n * @param[in]  frame   A string containing the data frame.\n *                     Example: \"value1,value2,value3\"\n *\n * @return     An array of strings with the split elements.\n *             Example: [\"value1\", \"value2\", \"value3\"]\n *\n * @note You can declare global variables outside this function if needed\n *       for storing settings or keeping state between calls.\n */\nvar lastFrame = null;\n \nfunction parse(frame) {\n    var stuff = frame.split(',');\n    //console.log(JSON.stringify(stuff));\n    for(var i = 0; i < frame.length; i++) {\n        if(stuff[i] == \"\") {\n            console.log(\"Keeping element \" + i + \": \" + lastFrame[i]);\n            stuff[i] = lastFrame[i];          \n        }\n    }\n    lastFrame = stuff;\n    //console.log(\"received \" + JSON.stringify(stuff));*/\n    return stuff;\n}",
+    "frameStart": "BEGIN",
     "groups": [
         {
             "datasets": [
@@ -14,7 +15,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 14,
+                    "index": 16,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -31,7 +32,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 15,
+                    "index": 17,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -48,7 +49,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 16,
+                    "index": 18,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -71,7 +72,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": false,
-                    "index": 20,
+                    "index": 22,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -88,7 +89,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": false,
-                    "index": 21,
+                    "index": 23,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -185,7 +186,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 18,
+                    "index": 20,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -202,7 +203,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 19,
+                    "index": 21,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -219,7 +220,7 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": true,
-                    "index": 20,
+                    "index": 22,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
@@ -421,10 +422,32 @@
             ],
             "title": "Wheel Speeds",
             "widget": "datagrid"
+        },
+        {
+            "datasets": [
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 256,
+                    "fftSamplingRate": 100,
+                    "graph": true,
+                    "index": 22,
+                    "led": false,
+                    "ledHigh": 1,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "latitude",
+                    "units": "",
+                    "value": "--.--",
+                    "widget": ""
+                }
+            ],
+            "title": "Data Grid (2)",
+            "widget": "datagrid"
         }
     ],
     "mapTilerApiKey": "",
-    "separator": ",",
     "thunderforestApiKey": "",
     "title": "Base Station Receiver"
 }

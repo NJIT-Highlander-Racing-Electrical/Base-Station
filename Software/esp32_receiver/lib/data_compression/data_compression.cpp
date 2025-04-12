@@ -1,5 +1,6 @@
 #include "data_compression.h"
 
+/*
 void load_uintx(char *bits, int *index, const int x, const uint16_t data) {
 	for(int i = 0; i < x; ++i) {
 		bits[(*index)++] = (data & (1 << i)) >> i;
@@ -45,10 +46,11 @@ void unpack_bits(const char *buffer, char *bits, const int numBits) {
 		bits[i] = (buffer[currentByte] >> (7 - (i % 8))) & 1;
 	}
 }
+*/
 
 // UNTESTED WITH INT32, CHANGE BACK IF HAVING PROBLEMS!!!!!!!
 
-/*void load_uintx(char *bits, int *index, const int x, const uint32_t data) {
+void load_uintx(char *bits, int *index, const int x, const uint32_t data) {
 	for(int i = 0; i < x; ++i) {
 		bits[(*index)++] = (data & (1 << i)) >> i;
 	}
@@ -92,4 +94,4 @@ void unpack_bits(const char *buffer, char *bits, const int numBits) {
 		int currentByte = i / 8;
 		bits[i] = (buffer[currentByte] >> (7 - (i % 8))) & 1;
 	}
-}*/
+}
