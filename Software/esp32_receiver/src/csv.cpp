@@ -64,11 +64,11 @@ int make_csv(char* buf, size_t bufLen, const rxdata_t rxdata) {
 
 	if(newDataPoints & PEDAL_DATA) {
 		pedal_data_t pedal = sortedData.pedal_data;
-		size_t written = snprintf(buf, bufLen, "%i,%i,", pedal.gas, pedal.brake);
+		size_t written = snprintf(buf, bufLen, "%i,%i,%i,%i,", pedal.gas, pedal.brake, pedal.frontPressure, pedal.rearPressure);
 		buf += written;
 		bufLen -= written;
 	} else {
-		size_t written = snprintf(buf, bufLen, ",,");
+		size_t written = snprintf(buf, bufLen, ",,,,");
 		buf += written;
 		bufLen -= written;
 	}

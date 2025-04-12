@@ -165,6 +165,8 @@ size_t pack_data(char *buffer, const baja_data_t *baja_data, const sent_data_poi
 	if(sent_data_points & PEDAL_DATA) {
 		load_uintx(bits, &i, PEDAL_BITS, baja_data->pedal_data.gas);
 		load_uintx(bits, &i, PEDAL_BITS, baja_data->pedal_data.brake);
+		load_uintx(bits, &i, PRESSURE_BITS, baja_data->pedal_data.frontPressure);
+		load_uintx(bits, &i, PRESSURE_BITS, baja_data->pedal_data.rearPressure);
 	}
 
 	if(sent_data_points & ACCEL_DATA) {
@@ -267,6 +269,8 @@ sent_data_points_t unpack_data(const char *buffer, baja_data_t *baja_data) {
 	if(recv_data_points & PEDAL_DATA) {
 		baja_data->pedal_data.gas = read_uintx(bits, &i, PEDAL_BITS);
 		baja_data->pedal_data.brake = read_uintx(bits, &i, PEDAL_BITS);
+		baja_data->pedal_data.frontPressure = read_uintx(bits, &i, PRESSURE_BITS);
+		baja_data->pedal_data.rearPressure = read_uintx(bits, &i, PRESSURE_BITS);
 	}
 
 	if(recv_data_points & ACCEL_DATA) {

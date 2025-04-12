@@ -294,6 +294,9 @@ const int rearRightWheelState_ID = 0x12;
 const int gasPedalPercentage_ID = 0x15;
 const int brakePedalPercentage_ID = 0x16;
 
+const int frontBrakePressure_ID = 0x17;
+const int rearBrakePressure_ID = 0x18;
+
 // Suspension Displacement CAN IDs
 const int frontLeftDisplacement_ID = 0x1F;
 const int frontRightDisplacement_ID = 0x20;
@@ -358,6 +361,9 @@ volatile int rearRightWheelState;
 // Pedal Sensors CAN
 volatile int gasPedalPercentage;
 volatile int brakePedalPercentage;
+
+volatile int frontBrakePressure;
+volatile int rearBrakePressure;
 
 // Suspension Displacement CAN
 volatile float frontLeftDisplacement;
@@ -549,6 +555,17 @@ void CAN_Task_Code(void *pvParameters)
         all_data.pedal_data.brake = CAN.parseInt();
         current_recv_data_points |= PEDAL_DATA;
         break;
+
+      case frontBrakePressure_ID:
+	all_data.pedal_data.frontPressure = CAN.parseInt();
+	current_recv_data_points |= PEDAL_DATA;
+	break;
+
+      case rearBrakePressure_ID:
+	all_data.pedal_data.rearPressure = CAN.praseInt();
+	current_recv_data_points |= PEDAL_DATA;
+	break;
+      
 
         // TODO: map these to percent
         // Suspension Displacement Case

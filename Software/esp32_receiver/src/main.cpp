@@ -9,6 +9,10 @@
 //#define BANDWIDTH 125
 //#define SPREADING_FACTOR 9
 
+
+// probably right, don't count on it
+#define SPEED_SWTICH_PIN 7
+
 #define BANDWIDTH 500
 #define SPREADING_FACTOR 7
 

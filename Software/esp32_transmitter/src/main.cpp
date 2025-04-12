@@ -10,6 +10,9 @@
 #define BANDWIDTH 500
 #define SPREADING_FACTOR 7
 
+// probably right but don't count on it
+#define SPEED_SWITCH_PIN 39
+
 // max 22
 #define TRANSMIT_POWER 22
 

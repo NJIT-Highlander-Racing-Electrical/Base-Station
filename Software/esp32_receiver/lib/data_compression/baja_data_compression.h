@@ -52,11 +52,14 @@ typedef struct {
 } suspension_displacements_t;
 
 // units: percent
-#define PEDAL_DATA_TOTAL_BITS 14
+#define PEDAL_DATA_TOTAL_BITS 38
 #define PEDAL_BITS 7
+#define PRESSURE_BITS 12
 typedef struct {
 	uint8_t gas : PEDAL_BITS;
 	uint8_t brake : PEDAL_BITS;
+	uint16_t frontPressure : PRESSURE_BITS;
+	uint16_t rearPressure : PRESSURE_BITS;
 } pedal_data_t;
 
 #define ACCEL_DATA_TOTAL_BITS 27
@@ -70,7 +73,7 @@ typedef struct {
 #define GYRO_DATA_TOTAL_BITS 42
 #define GYRO_BITS 14
 typedef struct {
-	int16_t yaw : GYRO_BITS
+	int16_t yaw : GYRO_BITS;
 	int16_t pitch : GYRO_BITS;
 	int16_t roll : GYRO_BITS;
 } gyroscope_data_t;
