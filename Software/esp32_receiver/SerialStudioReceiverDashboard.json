@@ -2,68 +2,10 @@
     "actions": [
     ],
     "decoder": 0,
-    "frameDetection": 1,
     "frameEnd": "END",
-    "frameParser": "/**\n * Splits a data frame into an array of elements using a comma separator.\n *\n * Use this function to break a string (like \"value1,value2,value3\") into\n * individual pieces, which can then be displayed or processed in your project.\n *\n * @param[in]  frame   A string containing the data frame.\n *                     Example: \"value1,value2,value3\"\n *\n * @return     An array of strings with the split elements.\n *             Example: [\"value1\", \"value2\", \"value3\"]\n *\n * @note You can declare global variables outside this function if needed\n *       for storing settings or keeping state between calls.\n */\nvar lastFrame = null;\n \nfunction parse(frame) {\n    var stuff = frame.split(',');\n    //console.log(JSON.stringify(stuff));\n    for(var i = 0; i < frame.length; i++) {\n        if(stuff[i] == \"\") {\n            console.log(\"Keeping element \" + i + \": \" + lastFrame[i]);\n            stuff[i] = lastFrame[i];          \n        }\n    }\n    lastFrame = stuff;\n    //console.log(\"received \" + JSON.stringify(stuff));*/\n    return stuff;\n}",
+    "frameParser": "/**\n * Splits a data frame into an array of elements using a comma separator.\n *\n * Use this function to break a string (like \"value1,value2,value3\") into\n * individual pieces, which can then be displayed or processed in your project.\n *\n * @param[in]  frame   A string containing the data frame.\n *                     Example: \"value1,value2,value3\"\n *\n * @return     An array of strings with the split elements.\n *             Example: [\"value1\", \"value2\", \"value3\"]\n *\n * @note You can declare global variables outside this function if needed\n *       for storing settings or keeping state between calls.\n */\n \nvar lastFrame = null;\n \nfunction parse(frame) {\n    var stuff = frame.split(',');\n    for(var i = 0; i < frame.length; i++) {\n        if(stuff[i] == \"\") {\n            console.log(\"Keeping element \" + i + \": \" + lastFrame[i]);\n            stuff[i] = lastFrame[i];          \n        }\n    }\n    lastFrame = stuff;\n    console.log(\"received \" + JSON.stringify(stuff));\n    return stuff;\n}\n",
     "frameStart": "BEGIN",
     "groups": [
-        {
-            "datasets": [
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 16,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Accelerometer X",
-                    "units": "m/s²",
-                    "value": "--.--",
-                    "widget": "x"
-                },
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 17,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Accelerometer Y",
-                    "units": "m/s²",
-                    "value": "--.--",
-                    "widget": "y"
-                },
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 18,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Accelerometer Z",
-                    "units": "m/s²",
-                    "value": "--.--",
-                    "widget": "z"
-                }
-            ],
-            "title": "Accelerometer",
-            "widget": "accelerometer"
-        },
         {
             "datasets": [
                 {
@@ -135,10 +77,10 @@
                     "log": false,
                     "max": 4500,
                     "min": 0,
-                    "title": "Primary RPM",
+                    "title": "Engine RPM",
                     "units": "RPM",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": "gauge"
                 },
                 {
                     "alarm": 0,
@@ -167,73 +109,16 @@
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 0,
+                    "max": 300,
                     "min": 0,
                     "title": "CVT Temperature",
                     "units": "Degrees (F)",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": "gauge"
                 }
             ],
-            "title": "Data Grid",
-            "widget": "datagrid"
-        },
-        {
-            "datasets": [
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 20,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Gyro X",
-                    "units": "deg/s",
-                    "value": "--.--",
-                    "widget": "x"
-                },
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 21,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Gyro Y",
-                    "units": "deg/s",
-                    "value": "--.--",
-                    "widget": "y"
-                },
-                {
-                    "alarm": 0,
-                    "fft": false,
-                    "fftSamples": 1024,
-                    "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 22,
-                    "led": false,
-                    "ledHigh": 1,
-                    "log": false,
-                    "max": 0,
-                    "min": 0,
-                    "title": "Gyro Z",
-                    "units": "deg/s",
-                    "value": "--.--",
-                    "widget": "z"
-                }
-            ],
-            "title": "Gyroscope",
-            "widget": "gyro"
+            "title": "CVT",
+            "widget": ""
         },
         {
             "datasets": [
@@ -260,20 +145,37 @@
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
                     "graph": false,
-                    "index": 13,
+                    "index": 14,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 100,
+                    "max": 1500,
                     "min": 0,
-                    "title": "Brake Pedal Percentage",
-                    "units": "%",
+                    "title": "Front Brake Pressure",
+                    "units": "PSI",
+                    "value": "--.--",
+                    "widget": "bar"
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "fftSamplingRate": 100,
+                    "graph": false,
+                    "index": 15,
+                    "led": false,
+                    "ledHigh": 1,
+                    "log": false,
+                    "max": 1500,
+                    "min": 0,
+                    "title": "Rear Brake Pressure",
+                    "units": "PSI",
                     "value": "--.--",
                     "widget": "bar"
                 }
             ],
             "title": "Pedal Percentages",
-            "widget": "datagrid"
+            "widget": ""
         },
         {
             "datasets": [
@@ -282,72 +184,72 @@
                     "fft": false,
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
-                    "graph": false,
+                    "graph": true,
                     "index": 8,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 3000,
-                    "min": 0,
+                    "max": 3.009999990463257,
+                    "min": -3.009999990463257,
                     "title": "Front Left Wheel Displacement",
                     "units": "in",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": ""
                 },
                 {
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
-                    "graph": false,
+                    "graph": true,
                     "index": 9,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 3000,
-                    "min": 0,
+                    "max": 3.009999990463257,
+                    "min": -3.009999990463257,
                     "title": "Front Right Wheel Displacement",
                     "units": "in",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": ""
                 },
                 {
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
-                    "graph": false,
+                    "graph": true,
                     "index": 10,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 3000,
-                    "min": 0,
+                    "max": 3.009999990463257,
+                    "min": -3.009999990463257,
                     "title": "Rear Left Wheel Displacement",
                     "units": "in",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": ""
                 },
                 {
                     "alarm": 0,
                     "fft": false,
                     "fftSamples": 1024,
                     "fftSamplingRate": 100,
-                    "graph": false,
+                    "graph": true,
                     "index": 11,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
-                    "max": 3000,
-                    "min": 0,
+                    "max": 3.009999990463257,
+                    "min": -3.009999990463257,
                     "title": "Rear Right Wheel Displacement",
                     "units": "in",
                     "value": "--.--",
-                    "widget": "bar"
+                    "widget": ""
                 }
             ],
             "title": "Wheel Displacements",
-            "widget": "datagrid"
+            "widget": ""
         },
         {
             "datasets": [
@@ -421,33 +323,68 @@
                 }
             ],
             "title": "Wheel Speeds",
-            "widget": "datagrid"
+            "widget": ""
         },
         {
             "datasets": [
                 {
                     "alarm": 0,
                     "fft": false,
-                    "fftSamples": 256,
+                    "fftSamples": 1024,
                     "fftSamplingRate": 100,
-                    "graph": true,
-                    "index": 22,
+                    "graph": false,
+                    "index": 16,
                     "led": false,
                     "ledHigh": 1,
                     "log": false,
                     "max": 0,
                     "min": 0,
-                    "title": "latitude",
-                    "units": "",
+                    "title": "Accel X",
+                    "units": "m/s^2",
+                    "value": "--.--",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "fftSamplingRate": 100,
+                    "graph": false,
+                    "index": 17,
+                    "led": false,
+                    "ledHigh": 1,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Accel Y",
+                    "units": "m/s^2",
+                    "value": "--.--",
+                    "widget": ""
+                },
+                {
+                    "alarm": 0,
+                    "fft": false,
+                    "fftSamples": 1024,
+                    "fftSamplingRate": 100,
+                    "graph": false,
+                    "index": 18,
+                    "led": false,
+                    "ledHigh": 1,
+                    "log": false,
+                    "max": 0,
+                    "min": 0,
+                    "title": "Accel Z",
+                    "units": "m/s^2",
                     "value": "--.--",
                     "widget": ""
                 }
             ],
-            "title": "Data Grid (2)",
-            "widget": "datagrid"
+            "title": "Accelerometer",
+            "widget": "multiplot"
         }
     ],
-    "mapTilerApiKey": "",
-    "thunderforestApiKey": "",
+    "mapTilerApiKey": "JLwysLGB01WFdVdKfJ41",
+    "separator": ",",
+    "thunderforestApiKey": "452cdcfc78ff4e64995b8109f27f0266",
     "title": "Base Station Receiver"
 }
