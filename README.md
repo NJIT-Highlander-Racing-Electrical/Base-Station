@@ -3,17 +3,6 @@
 A repository dedicated to the implementation of a PC Base Station that receives vehicle data over LoRa and displays it on [Serial Studio](https://serial-studio.github.io/)
 Essentially, a wireless version of the dashboard on a PC. This will also require a dedicated transmission subsystem on the vehicle.
 
-
-## To-Do
-
-* Clean up unused code
-* Add comments for clarity
-* Add Serial output too for wired connection to SerialStudio
-* Complete visual design for parsing data in SerialStudio
-* Update to latest CAN driver
-* Add software that sees when the last time the Base Station received a status bit from each subsystem
-    * This will allow us to recognize when a subsystem fails, even if the last status it sent before dying was healthy.
-
 ## Features/Goals
 
 * PC Gauges showing engine RPM and CVT secondary RPM
