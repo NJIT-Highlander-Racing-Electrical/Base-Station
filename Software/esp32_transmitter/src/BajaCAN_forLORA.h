@@ -706,7 +706,7 @@ void CAN_Task_Code(void *pvParameters)
         break;
 
 		
-		
+		/*
 
       // Status Bit Case
       case statusCVT_ID:
@@ -732,9 +732,15 @@ void CAN_Task_Code(void *pvParameters)
       case statusPedals_ID:
         statusPedals = CAN.parseInt();
         break;
+
+        */
       }
+
+      
     }
 
+
+    /*
     if ((millis() - lastCanSendTime) > canSendInterval)
     {
 
@@ -770,5 +776,6 @@ void CAN_Task_Code(void *pvParameters)
       CAN.endPacket();
 
     }
+      */
   }
 }
