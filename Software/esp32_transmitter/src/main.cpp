@@ -1,27 +1,27 @@
+#include <Arduino.h>
+
 #include <heltec_unofficial.h>
 #include <baja_data_compression.h>
 
-#include <BajaCAN_forLORA.h>
+#include <BajaCAN.h>
 
 #define FREQUENCY 905.2
-// #define BANDWIDTH 125
-// #define SPREADING_FACTOR 9
-
 #define BANDWIDTH_FAST 500
 #define SPREADING_FACTOR_FAST 7
 
 #define BANDWIDTH_SLOW 125
 #define SPREADING_FACTOR_SLOW 9
 
-// probably right but don't count on it
 #define SPEED_SWITCH_PIN 39
-
-// max 22
 #define TRANSMIT_POWER 22
 
 //#define RADIO_TEST
 
 bool speedSwitchState;
+
+// Declare these here since BajaCAN.h no longer provides them
+baja_data_t all_data;
+sent_data_points_t current_recv_data_points = 0;
 
 union crc_value
 {
@@ -31,9 +31,7 @@ union crc_value
 
 void setup()
 {
-
 	Serial.begin(115200);
-	setupCAN();
 
 	RadioLibCRCInstance.size = 16;
 	RadioLibCRCInstance.poly = 0x755B;
@@ -55,9 +53,7 @@ void setup()
 	}
 	radio.setOutputPower(TRANSMIT_POWER);
 
-#ifndef RADIO_TEST
-	setupCAN();
-#endif
+	setupCAN(BASE_STATION);
 }
 
 int a = 0;
@@ -67,15 +63,12 @@ int16_t send_packet(sent_data_points_t sd, const baja_data_t* bt)
 	char buf[100];
 	memset(buf, 0, 100);
 
-	// take the new data points and their values and pack them into the byte array we will transmit
 	size_t byteCount = pack_data(buf, bt, sd);
 
-	// compute a checksum and put it in our packet because radiolib can't seem to
-	// put it in the packet on its own
 	union crc_value checksum;
 	checksum.intVal = RadioLibCRCInstance.checksum((const uint8_t*)buf, byteCount);
 
-	char* fullStr = (char*)malloc(byteCount + 2); // 2 extra bytes for checksum
+	char* fullStr = (char*)malloc(byteCount + 2);
 	memcpy((void*)fullStr, (const void*)buf, byteCount);
 	fullStr[byteCount] = checksum.strVal[0];
 	fullStr[byteCount + 1] = checksum.strVal[1];
@@ -85,6 +78,37 @@ int16_t send_packet(sent_data_points_t sd, const baja_data_t* bt)
 	free(fullStr);
 
 	return status;
+}
+
+// Helper to populate all_data from the flat BajaCAN.h variables
+void populate_all_data()
+{
+	memset(&all_data, 0, sizeof(all_data));
+
+	all_data.cvt_data.primary = primaryRPM;
+	all_data.cvt_data.secondary = secondaryRPM;
+	all_data.cvt_data.temperature = primaryTemperature;
+
+	all_data.wheel_speeds.fl = frontLeftWheelSpeed;
+	all_data.wheel_speeds.fr = frontRightWheelSpeed;
+	all_data.wheel_speeds.rl = rearLeftWheelSpeed;
+	all_data.wheel_speeds.rr = rearRightWheelSpeed;
+
+	all_data.pedal_data.gas = gasPedalPercentage;
+	all_data.pedal_data.brake = brakePedalPercentage;
+	all_data.pedal_data.frontPressure = frontBrakePressure;
+	all_data.pedal_data.rearPressure = rearBrakePressure;
+
+	all_data.accel_data.x = accelerationX;
+	all_data.accel_data.y = accelerationY;
+	all_data.accel_data.z = accelerationZ;
+
+	all_data.gyro_data.roll = gyroscopeRoll;
+	all_data.gyro_data.pitch = gyroscopePitch;
+	all_data.gyro_data.yaw = gyroscopeYaw;
+
+	all_data.gps_pos.latitude = gpsLatitude;
+	all_data.gps_pos.longitude = gpsLongitude;
 }
 
 void loop()
@@ -106,12 +130,10 @@ void loop()
 		}
 	}
 
-#ifdef RADIO_TEST
+	#ifdef RADIO_TEST
 	if (button.isSingleClick())
 	{
 		both.printf("Button %i\n", ++a);
-
-		// send some fake data a couple hundred times
 
 		baja_data_t bt;
 		sent_data_points_t sd = 0;
@@ -119,10 +141,8 @@ void loop()
 		sd |= PEDAL_DATA;
 		sd |= GPS_LAT_LONG;
 
-		char buf[100];
 		for (int i = 0; i < 500; ++i)
 		{
-
 			bt.gps_pos.latitude = 16123456;
 			bt.gps_pos.longitude = -16654321;
 			bt.cvt_data.primary = 22;
@@ -134,6 +154,7 @@ void loop()
 			bt.pedal_data.brake = 2;
 			bt.pedal_data.frontPressure = 3;
 			bt.pedal_data.rearPressure = 4;
+
 			if (i % 10 == 0)
 				sd |= WHEEL_SPEEDS;
 
@@ -144,14 +165,10 @@ void loop()
 
 			if (sd & WHEEL_SPEEDS)
 				sd ^= WHEEL_SPEEDS;
-		}
+}
 	}
-#else
-
-	// can task will populate this as we receive data points
+	#else
 	current_recv_data_points = 0;
-
-	char buf[100];
 
 	delay(100);
 
@@ -159,11 +176,11 @@ void loop()
 	Serial.print("sd = ");
 	Serial.println(current_recv_data_points);
 
-	// all_data is in BajaCAN_forLORA.h
+	populate_all_data();
+
 	if (send_packet(current_recv_data_points, &all_data) != RADIOLIB_ERR_NONE)
 	{
 		both.println("Problems!!!!");
 	}
-
-#endif
+	#endif
 }
